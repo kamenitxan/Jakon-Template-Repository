@@ -1,0 +1,5 @@
+{% extends "core" %}
+
+{% block content %}
+
+{% endblock %}
