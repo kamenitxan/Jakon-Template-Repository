@@ -1,11 +1,10 @@
-package cz.kamenitxan.vocabularomana.entity
+package cz.kamenitxan.templateapp.entity
 
 import java.sql.{Connection, Statement}
 
 import cz.kamenitxan.jakon.core.model.JakonObject
 import cz.kamenitxan.jakon.webui.ObjectSettings
 import cz.kamenitxan.jakon.webui.entity.JakonField
-import javax.persistence.ManyToOne
 
 /**
   * Created by TPa on 2019-08-24.

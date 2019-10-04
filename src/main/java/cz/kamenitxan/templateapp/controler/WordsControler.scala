@@ -1,4 +1,4 @@
-package cz.kamenitxan.vocabularomana.controler
+package cz.kamenitxan.templateapp.controler
 
 import java.sql.Connection
 import java.util
@@ -9,7 +9,7 @@ import cz.kamenitxan.jakon.core.controler.IControler
 import cz.kamenitxan.jakon.core.database.DBHelper
 import cz.kamenitxan.jakon.core.template.TemplateEngine
 import cz.kamenitxan.jakon.core.template.utils.TemplateUtils
-import cz.kamenitxan.vocabularomana.entity.Word
+import cz.kamenitxan.templateapp.entity.Word
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._

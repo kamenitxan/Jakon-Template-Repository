@@ -1,4 +1,4 @@
-package cz.kamenitxan.vocabularomana;
+package cz.kamenitxan.templateapp;
 
 object Main {
 
