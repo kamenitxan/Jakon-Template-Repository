@@ -9,7 +9,7 @@ import cz.kamenitxan.jakon.webui.entity.JakonField
 /**
   * Created by TPa on 2019-08-24.
   */
-class Word extends JakonObject(classOf[Word].getName) {
+class Word extends JakonObject {
 
 	@JakonField(searched = true)
 	var latin: String = _

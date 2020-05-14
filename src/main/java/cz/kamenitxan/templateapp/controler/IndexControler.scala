@@ -2,19 +2,17 @@ package cz.kamenitxan.templateapp.controler
 
 import java.util
 
-import cz.kamenitxan.jakon.core.controler.IControler
+import cz.kamenitxan.jakon.core.controller.IController
 import cz.kamenitxan.jakon.core.database.DBHelper
 import cz.kamenitxan.jakon.core.template.TemplateEngine
 import cz.kamenitxan.jakon.core.template.utils.TemplateUtils
-import org.slf4j.{Logger, LoggerFactory}
+import cz.kamenitxan.jakon.logging.Logger
 
-import scala.collection.JavaConverters._
 
 /**
-  * Created by TPa on 2019-08-24.
-  */
-class IndexControler extends IControler {
-	private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+ * Created by TPa on 2019-08-24.
+ */
+class IndexControler extends IController {
 	private val template = "index"
 	private val ALL_PAGES_SQL = "SELECT * FROM Chapter JOIN JakonObject ON Chapter.id = JakonObject.id"
 
@@ -28,7 +26,7 @@ class IndexControler extends IControler {
 			context.put("chapters", "sada")
 			e.render(template, "index.html", context)
 		} catch {
-			case ex: Exception => logger.error("Exception occurred while generation of index page", ex)
+			case ex: Exception => Logger.error("Exception occurred while generation of index page", ex)
 		} finally {
 			conn.close()
 		}

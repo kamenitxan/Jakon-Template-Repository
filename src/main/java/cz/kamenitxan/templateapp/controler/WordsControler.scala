@@ -5,20 +5,19 @@ import java.util
 
 import com.google.gson.{Gson, GsonBuilder}
 import cz.kamenitxan.jakon.core.configuration.{DeployMode, Settings}
-import cz.kamenitxan.jakon.core.controler.IControler
+import cz.kamenitxan.jakon.core.controller.IController
 import cz.kamenitxan.jakon.core.database.DBHelper
 import cz.kamenitxan.jakon.core.template.TemplateEngine
 import cz.kamenitxan.jakon.core.template.utils.TemplateUtils
+import cz.kamenitxan.jakon.logging.Logger
 import cz.kamenitxan.templateapp.entity.Word
-import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
 
 /**
-  * Created by TPa on 2019-08-24.
-  */
-class WordsControler extends IControler {
-	private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+ * Created by TPa on 2019-08-24.
+ */
+class WordsControler extends IController {
 
 	private val template = "raw"
 	private val gson = if (Settings.getDeployMode == DeployMode.DEVEL) {
@@ -27,7 +26,7 @@ class WordsControler extends IControler {
 		new Gson()
 	}
 
-	private val ALL_WORDS_SQL = "SELECT * FROM Word JOIN Chapter ON Word.chapter_id = Chapter.id"
+	private val ALL_WORDS_SQL = "SELECT * FROM Word"
 
 	def generate() {
 		val e: TemplateEngine = TemplateUtils.getEngine
@@ -39,7 +38,7 @@ class WordsControler extends IControler {
 			context.put("content", gson.toJson(words.asJava))
 			e.render(template, "words.json", context)
 		} catch {
-			case ex: Exception => logger.error("Exception occurred while generation of words json", ex)
+			case ex: Exception => Logger.error("Exception occurred while generation of words json", ex)
 		} finally {
 			conn.close()
 		}

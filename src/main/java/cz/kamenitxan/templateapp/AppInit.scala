@@ -13,8 +13,8 @@ class AppInit extends JakonInit {
 	override def daoSetup(): Unit = {
 		DBHelper.addDao(classOf[Word])
 
-		Director.registerControler(new IndexControler)
-		Director.registerControler(new WordsControler)
+		Director.registerController(new IndexControler)
+		Director.registerController(new WordsControler)
 	}
 
 
