@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>cz.kamenitxan</groupId>
 			<artifactId>jakon</artifactId>
-			<version>0.3-20200416.140711-1</version>
+			<version>0.3-20201223.181407-29</version>
 		</dependency>
 	</dependencies>
 
@@ -64,8 +64,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>8</source>
-					<target>8</target>
+					<source>11</source>
+					<target>11</target>
 				</configuration>
 			</plugin>
 
