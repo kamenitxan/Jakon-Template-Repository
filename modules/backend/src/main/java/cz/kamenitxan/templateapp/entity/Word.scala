@@ -1,10 +1,10 @@
 package cz.kamenitxan.templateapp.entity
 
-import java.sql.{Connection, Statement}
+import cz.kamenitxan.jakon.core.database.JakonField
 
+import java.sql.{Connection, Statement}
 import cz.kamenitxan.jakon.core.model.JakonObject
 import cz.kamenitxan.jakon.webui.ObjectSettings
-import cz.kamenitxan.jakon.webui.entity.JakonField
 
 /**
   * Created by TPa on 2019-08-24.

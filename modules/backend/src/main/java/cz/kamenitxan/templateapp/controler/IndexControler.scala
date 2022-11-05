@@ -16,19 +16,15 @@ class IndexControler extends IController {
 	private val template = "index"
 	private val ALL_PAGES_SQL = "SELECT * FROM Chapter JOIN JakonObject ON Chapter.id = JakonObject.id"
 
-	def generate() {
+	def generate(): Unit = {
 		val e: TemplateEngine = TemplateUtils.getEngine
-		val conn = DBHelper.getConnection
-		try {
-			val stmt = conn.createStatement()
-
-			val context = new util.HashMap[String, AnyRef]
-			context.put("chapters", "sada")
+		
+		DBHelper.withDbConnection(implicit conn => {
+			val context = Map[String, AnyRef](
+				"chapters" -> "chapter list"
+			)
 			e.render(template, "index.html", context)
-		} catch {
-			case ex: Exception => Logger.error("Exception occurred while generation of index page", ex)
-		} finally {
-			conn.close()
-		}
+		})
+		
 	}
 }

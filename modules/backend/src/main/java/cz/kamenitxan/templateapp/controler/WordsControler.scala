@@ -19,6 +19,8 @@ import scala.collection.JavaConverters._
  */
 class WordsControler extends IController {
 
+	private implicit val cls: Class[Word] = classOf[Word]
+
 	private val template = "raw"
 	private val gson = if (Settings.getDeployMode == DeployMode.DEVEL) {
 		new GsonBuilder().setPrettyPrinting().create
@@ -28,19 +30,17 @@ class WordsControler extends IController {
 
 	private val ALL_WORDS_SQL = "SELECT * FROM Word"
 
-	def generate() {
+	def generate(): Unit = {
 		val e: TemplateEngine = TemplateUtils.getEngine
-		implicit val conn: Connection = DBHelper.getConnection
-		try {
+
+		DBHelper.withDbConnection(implicit conn => {
 			val stmt = conn.createStatement()
-			val words = DBHelper.selectDeep(stmt, ALL_WORDS_SQL, classOf[Word])
-			val context = new util.HashMap[String, AnyRef]
-			context.put("content", gson.toJson(words.asJava))
+			val words = DBHelper.selectDeep(stmt, ALL_WORDS_SQL)
+			val context = Map[String, AnyRef](
+				"content" -> gson.toJson(words.asJava)
+			)
 			e.render(template, "words.json", context)
-		} catch {
-			case ex: Exception => Logger.error("Exception occurred while generation of words json", ex)
-		} finally {
-			conn.close()
-		}
+		})
+
 	}
 }

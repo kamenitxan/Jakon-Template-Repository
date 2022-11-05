@@ -1,35 +1,19 @@
-# Created by .ignore support plugin (hsz.mobi)
-### Java template
-# Compiled class file
-*.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-### Scala template
-.idea/
-/jakonTest.sqlite
-.node_modules/
-node_modules/*
-/out/
+/.bsp/
+/node_modules/
+/modules/backend/src/main/resources/dev.js
+/modules/backend/fluvii.sqlite
+/modules/backend/target/
+/.idea/
+/modules/shared/target/
+/modules/frontend/target/
 /target/
-/fulltext/
+/modules/shared/.js/target/
+/modules/shared/.jvm/target/
+/project/target/
+/project/project/target/
+/modules/backend/out/
+/modules/backend/upload/
+/modules/backend/localDeploy/
+/modules/backend/static/jakon/
+/modules/backend/jakon.sqlite
 /upload/
-/static/
-/templateapp.iml
