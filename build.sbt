@@ -5,11 +5,12 @@ val V = new {
 	val jakon = "0.5.1-SNAPSHOT"
 }
 val projectName = "template-app"
+val projectVersion = "1.0.0"
 
 scalaVersion := V.Scala
 organization := "cz.kamenitxan"
 name := projectName
-version := V.jakon
+version := projectVersion
 
 
 ThisBuild / resolvers += Resolver.mavenLocal
