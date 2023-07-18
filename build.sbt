@@ -1,8 +1,8 @@
 import sbtassembly.AssemblyPlugin.autoImport.assembly
 
 val V = new {
-	val Scala = "3.2.0"
-	val jakon = "0.5.1-SNAPSHOT"
+	val Scala = "3.3.0"
+	val jakon = "0.5.5"
 }
 val projectName = "template-app"
 val projectVersion = "1.0.0"
@@ -30,7 +30,7 @@ val Dependencies = new {
 					ExclusionRule(organization = "com.sun.mail", name = "smtp"),
 					ExclusionRule(organization = "javax.mail", name = "javax.mail-api")
 				),
-				"org.scalatest" %% "scalatest" % "3.2.14" % "test",
+				"org.scalatest" %% "scalatest" % "3.2.15" % "test",
 				"org.seleniumhq.selenium" % "htmlunit-driver" % "3.63.0" % "test"
 			)
 	)
