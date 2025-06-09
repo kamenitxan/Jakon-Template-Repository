@@ -1,12 +1,9 @@
 package cz.kamenitxan.templateapp.controler
 
-import java.util
-
 import cz.kamenitxan.jakon.core.controller.IController
 import cz.kamenitxan.jakon.core.database.DBHelper
 import cz.kamenitxan.jakon.core.template.TemplateEngine
 import cz.kamenitxan.jakon.core.template.utils.TemplateUtils
-import cz.kamenitxan.jakon.logging.Logger
 
 
 /**

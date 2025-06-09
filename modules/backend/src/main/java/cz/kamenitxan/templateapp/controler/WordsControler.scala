@@ -1,18 +1,14 @@
 package cz.kamenitxan.templateapp.controler
 
-import java.sql.Connection
-import java.util
-
 import com.google.gson.{Gson, GsonBuilder}
 import cz.kamenitxan.jakon.core.configuration.{DeployMode, Settings}
 import cz.kamenitxan.jakon.core.controller.IController
 import cz.kamenitxan.jakon.core.database.DBHelper
 import cz.kamenitxan.jakon.core.template.TemplateEngine
 import cz.kamenitxan.jakon.core.template.utils.TemplateUtils
-import cz.kamenitxan.jakon.logging.Logger
 import cz.kamenitxan.templateapp.entity.Word
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.*
 
 /**
  * Created by TPa on 2019-08-24.
