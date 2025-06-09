@@ -1,8 +1,10 @@
 import sbtassembly.AssemblyPlugin.autoImport.assembly
 
+import scala.collection.Seq
+
 val V = new {
-	val Scala = "3.3.0"
-	val jakon = "0.5.5"
+	val Scala = "3.3.4"
+	val jakon = "0.7.0-SNAPSHOT"
 }
 val projectName = "template-app"
 val projectVersion = "1.0.0"
@@ -14,7 +16,7 @@ version := projectVersion
 
 
 ThisBuild / resolvers += Resolver.mavenLocal
-ThisBuild / resolvers += "Artifactory" at "https://kamenitxans-maven-repository.appspot.com/"
+ThisBuild / resolvers += "Artifactory" at "https://nexus.kamenitxan.eu/repository/jakon/"
 
 
 val Dependencies = new {
@@ -26,16 +28,15 @@ val Dependencies = new {
 	lazy val backend = Seq(
 		libraryDependencies ++=
 			Seq(
-				"cz.kamenitxan" %% "jakon" % V.jakon changing() excludeAll (
-					ExclusionRule(organization = "com.sun.mail", name = "smtp"),
-					ExclusionRule(organization = "javax.mail", name = "javax.mail-api")
-				),
-				"org.scalatest" %% "scalatest" % "3.2.15" % "test",
-				"org.seleniumhq.selenium" % "htmlunit-driver" % "3.63.0" % "test"
+				"cz.kamenitxan" %% "jakon" % V.jakon changing()
 			)
 	)
 
 	lazy val tests = Def.settings(
+		libraryDependencies ++= Seq(
+			"org.scalatest" %% "scalatest" % "3.2.19" % Test,
+			"org.seleniumhq.selenium" % "htmlunit3-driver" % "4.32.0" % Test
+		)
 	)
 }
 
@@ -58,21 +59,18 @@ lazy val backend = (project in file("modules/backend"))
 	.settings(Dependencies.backend)
 	.settings(Dependencies.tests)
 	.settings(commonBuildSettings)
-	.enablePlugins(JavaAppPackaging)
-	.enablePlugins(DockerPlugin)
 	.settings(
 		name := projectName,
 		Compile / mainClass := Some("cz.kamenitxan.templateapp.Main"),
 		Test / fork := true,
-		Universal / mappings += {
-			val appJs = (frontend / Compile / fullOptJS).value.data
-			appJs -> "lib/prod.js"
-		},
-		Universal / javaOptions ++= Seq(
-			"--port 8080",
-			"--mode prod"
-		),
-		Docker / packageName := "tauroadmin-example"
+		scalacOptions ++= Seq(
+			"-deprecation", // emit warning and location for usages of deprecated APIs
+			"-explain-types", // explain type errors in more detail
+			"-feature", // emit warning and location for usages of features that should be imported explicitly
+			"-no-indent", // do not allow significant indentation.
+			"-print-lines", // show source code line numbers.
+			"-unchecked", // enable additional warnings where generated code depends on assumptions
+		)
 	)
 
 lazy val commonBuildSettings: Seq[Def.Setting[_]] = Seq(
@@ -146,3 +144,4 @@ val PrepareCICommands = Seq(
 
 addCommandAlias("ci", CICommands)
 addCommandAlias("preCI", PrepareCICommands)
+addCommandAlias("outdated", "dependencyUpdates")
