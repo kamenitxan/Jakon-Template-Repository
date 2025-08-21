@@ -3,8 +3,8 @@ import sbtassembly.AssemblyPlugin.autoImport.assembly
 import scala.collection.Seq
 
 val V = new {
-	val Scala = "3.3.4"
-	val jakon = "0.7.0-SNAPSHOT"
+	val Scala = "3.3.6"
+	val jakon = "0.7.0"
 }
 val projectName = "template-app"
 val projectVersion = "1.0.0"
@@ -35,7 +35,7 @@ val Dependencies = new {
 	lazy val tests = Def.settings(
 		libraryDependencies ++= Seq(
 			"org.scalatest" %% "scalatest" % "3.2.19" % Test,
-			"org.seleniumhq.selenium" % "htmlunit3-driver" % "4.32.0" % Test
+			"org.seleniumhq.selenium" % "htmlunit3-driver" % "4.35.0" % Test
 		)
 	)
 }
