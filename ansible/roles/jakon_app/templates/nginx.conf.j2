@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+server {
+       listen {{ nginx_listen_port }};
+       listen [::]:{{ nginx_listen_port }};
+
+       access_log /var/log/nginx/{{ server_name }}.access.log;
+       error_log  /var/log/nginx/{{ server_name }}.error.log;
+
+       server_name {{ server_name }};
+
+       root {{ app_dir }}/out;
+
+       location / {
+               try_files $uri @jakon;
+       }
+
+       location @jakon {
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_pass http://localhost:{{ jakon_port_resolved }};
+        }
+}

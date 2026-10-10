@@ -1,0 +1,35 @@
+# {{ ansible_managed }}
+[Unit]
+Description={{ app_description }}
+After=network.target
+
+[Service]
+User={{ app_user }}
+Group={{ app_user }}
+# The configuration file jakon_config.properties should be here:
+WorkingDirectory={{ app_dir }}
+ExecStart={{ java_bin }} {{ java_opts }} -jar {{ app_dir }}/app.jar host={{ jakon_host }}
+SuccessExitStatus=143
+UMask=0007
+
+# --- sandboxing: the app sees only its own directory in {{ srv_root }} ---
+TemporaryFileSystem={{ srv_root }}:ro
+BindPaths={{ app_dir }}
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+NoNewPrivileges=true
+RestrictSUIDSGID=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+---
+- name: Reload systemd
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+
+- name: Restart app
+  ansible.builtin.systemd_service:
+    name: "{{ project_name }}"
+    state: restarted
+  when: app_jar.stat.exists
+
+- name: Reload nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded

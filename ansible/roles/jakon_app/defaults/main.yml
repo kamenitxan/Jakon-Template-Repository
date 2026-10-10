@@ -1,0 +1,21 @@
+---
+# project_name and server_name are required and have no default
+srv_root: /srv
+app_dir: "{{ srv_root }}/{{ project_name }}"
+app_user: "{{ project_name }}"
+app_description: "{{ project_name | capitalize }}"
+
+# read from jakon_config.properties on the server; required when the config is not there yet
+jakon_port: ""
+# address Jakon listens on, only nginx should be reachable from outside
+jakon_host: 127.0.0.1
+
+java_bin: /usr/bin/java
+java_opts: "-XX:+HeapDumpOnOutOfMemoryError"
+
+nginx_listen_port: 8080
+nginx_user: www-data
+
+# existing server user that gets access to the app directory (uploads jars, config, ...)
+# set per server in inventory.ini; empty = user Ansible connects as
+deploy_user: ""

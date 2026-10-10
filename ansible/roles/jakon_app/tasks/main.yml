@@ -1,0 +1,173 @@
+---
+- name: Validate project name
+  ansible.builtin.assert:
+    that:
+      - project_name is defined
+      - project_name is match('^[a-z][a-z0-9_-]*$')
+    fail_msg: "Pass project name: -e project_name=<name> (lowercase letters, digits, - and _)"
+    quiet: true
+
+- name: Validate server name
+  ansible.builtin.assert:
+    that:
+      - server_name is defined
+      - server_name | length > 0
+    fail_msg: "Pass domain: -e server_name=<domain>"
+    quiet: true
+
+- name: Detect deploy user
+  ansible.builtin.command: whoami
+  become: false
+  register: whoami_result
+  changed_when: false
+  when: deploy_user | length == 0
+
+# --- port -------------------------------------------------------------------
+
+# jakon_config.properties is uploaded by CI; port is taken from it when present
+- name: Read existing config
+  ansible.builtin.slurp:
+    src: "{{ app_dir }}/jakon_config.properties"
+  register: existing_config
+  failed_when: false
+
+- name: Resolve facts
+  ansible.builtin.set_fact:
+    deploy_user_resolved: "{{ deploy_user if deploy_user | length > 0 else whoami_result.stdout }}"
+    config_port: "{{ (existing_config.content | default('') | b64decode | regex_findall('^port=([0-9]+)', multiline=True) + ['']) | first }}"
+
+- name: Require port when it cannot be read from config
+  ansible.builtin.assert:
+    that:
+      - config_port | length > 0 or jakon_port | string | length > 0
+    fail_msg: "{{ app_dir }}/jakon_config.properties not found or has no port. Pass it: -e jakon_port=<port>"
+    quiet: true
+
+- name: Check port parameter matches config
+  ansible.builtin.assert:
+    that:
+      - jakon_port | string == config_port
+    fail_msg: "jakon_port={{ jakon_port }} differs from port={{ config_port }} in {{ app_dir }}/jakon_config.properties"
+    quiet: true
+  when:
+    - config_port | length > 0
+    - jakon_port | string | length > 0
+
+- name: Resolve port
+  ansible.builtin.set_fact:
+    jakon_port_resolved: "{{ config_port if config_port | length > 0 else jakon_port }}"
+
+- name: Show resolved settings
+  ansible.builtin.debug:
+    msg: "{{ project_name }}: dir={{ app_dir }} port={{ jakon_port_resolved }} server_name={{ server_name }} deploy_user={{ deploy_user_resolved }}"
+
+# --- user and directories ---------------------------------------------------
+
+- name: Create system user
+  ansible.builtin.user:
+    name: "{{ app_user }}"
+    system: true
+    home: "{{ app_dir }}"
+    create_home: false
+    shell: /usr/sbin/nologin
+
+- name: Check deploy user exists
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ deploy_user_resolved }}"
+    fail_key: false
+
+- name: Fail when deploy user does not exist
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.getent_passwd[deploy_user_resolved] is not none
+    fail_msg: "Deploy user '{{ deploy_user_resolved }}' does not exist on {{ inventory_hostname }}. Set deploy_user in inventory.ini"
+    quiet: true
+
+# gives the deploy user read/write access to the app directory (effective on next login)
+- name: Add deploy user to app group
+  ansible.builtin.user:
+    name: "{{ deploy_user_resolved }}"
+    groups: "{{ app_user }}"
+    append: true
+  when: deploy_user_resolved != 'root'
+
+# nginx serves {{ app_dir }}/out directly, other users get no access to the app directory
+- name: Add nginx user to app group
+  ansible.builtin.user:
+    name: "{{ nginx_user }}"
+    groups: "{{ app_user }}"
+    append: true
+  notify: Reload nginx
+
+- name: Create app directory
+  ansible.builtin.file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "2770"
+
+- name: Create app subdirectories
+  ansible.builtin.file:
+    path: "{{ app_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "2770"
+  loop:
+    - jar
+    - out
+    - static
+    - templates
+    - "templates/{{ project_name }}"
+    - upload
+
+# --- systemd ----------------------------------------------------------------
+
+- name: Create systemd service
+  ansible.builtin.template:
+    src: app.service.j2
+    dest: "/etc/systemd/system/{{ project_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart app
+
+- name: Check whether app.jar is deployed
+  ansible.builtin.stat:
+    path: "{{ app_dir }}/app.jar"
+  register: app_jar
+
+- name: Flush handlers before enabling service
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable service (started only when app.jar exists)
+  ansible.builtin.systemd_service:
+    name: "{{ project_name }}"
+    enabled: true
+    state: "{{ 'started' if app_jar.stat.exists else omit }}"
+
+# --- nginx ------------------------------------------------------------------
+
+- name: Create nginx site
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: "/etc/nginx/sites-available/{{ project_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Enable nginx site
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ project_name }}"
+    dest: "/etc/nginx/sites-enabled/{{ project_name }}"
+    state: link
+  notify: Reload nginx
+
+- name: Validate nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false

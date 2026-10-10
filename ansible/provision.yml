@@ -1,0 +1,14 @@
+---
+# Provision a new Jakon application on the server.
+#
+# Usage:
+#   cp inventory.example.ini inventory.ini   # and fill in your server
+#   ansible-playbook provision.yml -e project_name=myapp -e server_name=myapp.example.com --ask-become-pass
+#
+# Port is read from /srv/<project_name>/jakon_config.properties (uploaded by CI).
+# When that file does not exist yet, the port is required:
+#   -e jakon_port=4571
+- name: Provision Jakon application
+  hosts: jakon
+  roles:
+    - jakon_app
