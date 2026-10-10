@@ -1,58 +1,21 @@
 import sbtassembly.AssemblyPlugin.autoImport.assembly
 
-import scala.collection.Seq
-
-val V = new {
-	val Scala = "3.3.7"
-	val jakon = "0.7.1"
-}
 val projectName = "template-app"
 val projectVersion = "1.0.0"
 
-scalaVersion := V.Scala
-organization := "cz.kamenitxan"
-name := projectName
-version := projectVersion
-
+ThisBuild / scalaVersion := V.Scala
+ThisBuild / organization := "cz.kamenitxan"
 
 ThisBuild / resolvers += Resolver.mavenLocal
 ThisBuild / resolvers += "Artifactory" at "https://nexus.kamenitxan.eu/repository/jakon/"
 
 
-val Dependencies = new {
-
-	lazy val frontend = Seq(
-
-	)
-
-	lazy val backend = Seq(
-		libraryDependencies ++=
-			Seq(
-				"cz.kamenitxan" %% "jakon" % V.jakon changing()
-			)
-	)
-
-	lazy val tests = Def.settings(
-		libraryDependencies ++= Seq(
-			"org.scalatest" %% "scalatest" % "3.2.19" % Test,
-			"org.seleniumhq.selenium" % "htmlunit3-driver" % "4.41.0" % Test
-		)
-	)
-}
-
-lazy val root = (project in file(".")).aggregate(frontend, backend)
-
-lazy val frontend = (project in file("modules/frontend"))
-	.enablePlugins(ScalaJSPlugin)
-	.settings(scalaJSUseMainModuleInitializer := false)
+lazy val root = (project in file("."))
+	.aggregate(backend)
+	.disablePlugins(AssemblyPlugin)
 	.settings(
-		Dependencies.frontend,
-		Dependencies.tests,
-		Test / jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
-	)
-	.settings(
-		commonBuildSettings,
-		name := projectName + "-fe"
+		name := projectName + "-root",
+		version := projectVersion
 	)
 
 lazy val backend = (project in file("modules/backend"))
@@ -62,6 +25,7 @@ lazy val backend = (project in file("modules/backend"))
 	.settings(
 		name := projectName,
 		Compile / mainClass := Some("cz.kamenitxan.templateapp.Main"),
+		Compile / run / fork := true,
 		Test / fork := true,
 		scalacOptions ++= Seq(
 			"-deprecation", // emit warning and location for usages of deprecated APIs
@@ -73,17 +37,18 @@ lazy val backend = (project in file("modules/backend"))
 		)
 	)
 
-lazy val commonBuildSettings: Seq[Def.Setting[_]] = Seq(
+lazy val commonBuildSettings: Seq[Def.Setting[?]] = Seq(
 	scalaVersion := V.Scala,
 	organization := "cz.kamenitxan",
 	name := projectName,
-	version := V.jakon,
+	version := projectVersion,
 	startYear := Some(2015)
 )
 
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
-ThisBuild / semanticdbEnabled := false
-ThisBuild / scalacOptions += "-deprecation"
+// semanticdb + unused imports warning are required by scalafix OrganizeImports
+ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / scalacOptions += "-Wunused:imports"
 ThisBuild / assembly / assemblyMergeStrategy := {
 	case PathList("module-info.class") => MergeStrategy.discard
 	case x if x.endsWith("module-info.class") => MergeStrategy.discard
@@ -95,31 +60,11 @@ ThisBuild / assembly / assemblyMergeStrategy := {
 }
 
 Test / fork := true
-Test / testForkedParallel := false
 Test / parallelExecution:= false
 Test / logBuffered := false
 
-lazy val fastOptCompileCopy = taskKey[Unit]("")
-val jsPath = "modules/backend/src/main/resources"
-fastOptCompileCopy := {
-	val source = (frontend / Compile / fastOptJS).value.data
-	IO.copyFile(
-		source,
-		baseDirectory.value / jsPath / "dev.js"
-	)
-}
-
-lazy val fullOptCompileCopy = taskKey[Unit]("")
-fullOptCompileCopy := {
-	val source = (frontend / Compile / fullOptJS).value.data
-	IO.copyFile(
-		source,
-		baseDirectory.value / jsPath / "prod.js"
-	)
-}
-
-addCommandAlias("runDev", ";fastOptCompileCopy; backend/reStart --mode dev")
-addCommandAlias("runProd", ";fullOptCompileCopy; backend/reStart --mode prod")
+addCommandAlias("runDev", "backend/run --mode dev")
+addCommandAlias("runProd", "backend/run --mode prod")
 
 val scalafixRules = Seq(
 	"OrganizeImports",
@@ -129,17 +74,14 @@ val scalafixRules = Seq(
 ).mkString(" ")
 
 val CICommands = Seq(
-	"clean",
+	"cleanFull",
 	"backend/compile",
-	"backend/test",
-	"frontend/compile",
-	"frontend/fastOptJS",
-	"frontend/test",
-	s"scalafix --check $scalafixRules"
+	"backend/testFull",
+	s"backend/scalafix --check $scalafixRules"
 ).mkString(";")
 
 val PrepareCICommands = Seq(
-	s"scalafix $scalafixRules"
+	s"backend/scalafix $scalafixRules"
 ).mkString(";")
 
 addCommandAlias("ci", CICommands)

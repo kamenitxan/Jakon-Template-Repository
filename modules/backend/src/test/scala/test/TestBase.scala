@@ -7,7 +7,7 @@ import org.scalatest.funsuite.FixtureAnyFunSuite
 import org.scalatest.{Assertion, Outcome}
 
 import scala.collection.mutable
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 
 class TestBase extends FixtureAnyFunSuite {

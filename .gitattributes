@@ -1,2 +1,5 @@
 ansible/** text eol=lf
 .claude/** text eol=lf
+*.scala text eol=lf
+*.sbt text eol=lf
+.scalafix.conf text eol=lf
